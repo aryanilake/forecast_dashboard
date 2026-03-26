@@ -1,0 +1,4 @@
+
+Row 1: FCST/OBS is OBS, skipping extraction.
+
+Row 2: Validity 310600 to 311000
