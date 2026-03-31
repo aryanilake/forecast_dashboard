@@ -386,9 +386,9 @@ def create_super_admin():
         return  # already exists
 
     super_admin = User(
-        username="VABB",
+        username="SUADMIN",
         station_code="VABB",
-        password_hash=generate_password_hash("Vabb@123"),
+        password_hash=generate_password_hash("Superadmin@123"),
         role="super_admin",
         is_active=True
     )

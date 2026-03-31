@@ -486,12 +486,12 @@ def generate_aerodrome_warnings_table(ad_warn_output_path, metar_features_path):
         (final_df['true-1 / false-0'] == 1)
     ])
     
-    thunderstorm_percentage = f"{int((accurate_thunderstorm / total_thunderstorm * 100))}%" if total_thunderstorm > 0 else "0%"
-    gust_percentage = f"{int((accurate_gust / total_gust * 100))}%" if total_gust > 0 else "0%"
+    thunderstorm_percentage = f"{int((accurate_thunderstorm / total_thunderstorm * 100))}%" if total_thunderstorm > 0 else "nil"
+    gust_percentage = f"{int((accurate_gust / total_gust * 100))}%" if total_gust > 0 else "nil"
     
     # Format thunderstorm times - all times separated by commas
-    thunderstorm_times_str = ",".join(thunderstorm_times) if thunderstorm_times else "-"
-    gust_times_str = ",".join(gust_times) if gust_times else "-"
+    thunderstorm_times_str = ",".join(thunderstorm_times) if thunderstorm_times else "nil"
+    gust_times_str = ",".join(gust_times) if gust_times else "nil"
 
     # Add data rows exactly as in frontend
     data = [

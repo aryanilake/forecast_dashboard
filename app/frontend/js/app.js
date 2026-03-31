@@ -1756,11 +1756,19 @@ if (adwrnVerifyBtn && adwrnReportLoadingSection) {
                     
                     if (thunderstormPercent) {
                         const thunderstormValue = detailedAccuracy.thunderstorm;
-                        thunderstormPercent.textContent = thunderstormValue !== undefined ? `${thunderstormValue}%` : '--%';
+                        if (thunderstormValue == 0) {
+                            thunderstormPercent.textContent = "--%";
+                        } else {
+                            thunderstormPercent.textContent = thunderstormValue !== undefined ? `${thunderstormValue}%` : '--%';
+                        }
                     }
                     if (gustPercent) {
                         const windValue = detailedAccuracy.wind;
-                        gustPercent.textContent = windValue !== undefined ? `${windValue}%` : '--%';
+                        if (windValue == 0) {
+                            gustPercent.textContent = "--%";
+                        } else {
+                            gustPercent.textContent = windValue !== undefined ? `${windValue}%` : '--%';
+                        }
                     }
                     
                     // Show station info if available

@@ -323,7 +323,7 @@
   </div>
 
   <!-- Add Admin Modal -->
-  <div id="addAdminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div id="addAdminModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
       <h3 class="text-lg font-bold mb-4">Add New Admin</h3>
       <form id="addAdminForm" class="space-y-4">
@@ -345,7 +345,7 @@
   </div>
 
   <!-- Add User Modal -->
-  <div id="addUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div id="addUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
       <h3 class="text-lg font-bold mb-4">Add New User</h3>
       <form id="addUserForm" class="space-y-4">
@@ -366,8 +366,7 @@
     </div>
   </div>
 
-  <!-- Alert Messages -->
-  <div id="alertBox" class="hidden fixed top-4 right-4 p-4 rounded-md shadow-md text-white max-w-sm z-40"></div>
+  <div id="alertBox" class="hidden fixed top-4 right-4 p-4 rounded-md shadow-md text-white max-w-sm z-50"></div>
 </main>
 <footer class="bg-gray-800 text-gray-300 py-6 w-full mt-auto">
         <div class="container mx-auto px-4 max-w-7xl text-center">
@@ -481,7 +480,7 @@
     const alertBox = document.getElementById('alertBox');
     if (alertBox) {
       alertBox.textContent = message;
-      alertBox.className = `${type === 'success' ? 'bg-green-500' : 'bg-red-500'} fixed top-4 right-4 p-4 rounded-md shadow-md text-white max-w-sm z-40`;
+      alertBox.className = `${type === 'success' ? 'bg-green-500' : 'bg-red-500'} fixed top-4 right-4 p-4 rounded-md shadow-md text-white max-w-sm z-50`;
       alertBox.classList.remove('hidden');
       setTimeout(() => alertBox.classList.add('hidden'), 3000);
     }
