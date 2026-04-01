@@ -61,6 +61,7 @@ def parse_validity_to_month_year(validity_str):
     """Parse validity string like '202506010000' to month and year format"""
     try:
         validity_str = validity_str.rstrip('Z')
+        print(f"Parsing validity string: {validity_str}")
         
         if len(validity_str) == 12:
             year = int(validity_str[:4])
@@ -96,7 +97,6 @@ def parse_validity_to_month_year(validity_str):
             else: 
                 year += 1900
             
-            from datetime import datetime
             current_date = datetime.now()
             date_obj = datetime(year, current_date.month, day, hour, minute)
             
@@ -106,7 +106,6 @@ def parse_validity_to_month_year(validity_str):
             minute = int(validity_str[4:6])
             year = int(validity_str[6:10])
             
-            from datetime import datetime
             current_date = datetime.now()
             date_obj = datetime(year, current_date.month, day, hour, minute)
             
@@ -1033,7 +1032,6 @@ def adwrn_verify():
                 
         except Exception as e:
             print(f"Error calculating detailed accuracy: {e}")
-        # Ensure accuracy is properly formatted
         try:
             if isinstance(accuracy, (int, float)):
                 accuracy_str = f"{accuracy:.0f}"
@@ -1043,7 +1041,6 @@ def adwrn_verify():
             print(f"[DEBUG] Error formatting accuracy: {e}")
             accuracy_str = str(accuracy)
         
-        # Extract station and date information from METAR file
         station_info = ""
         validity_info = ""
         try:

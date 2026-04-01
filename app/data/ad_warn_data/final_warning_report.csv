@@ -1,4 +1,4 @@
-Aerodrome warning for station VABB for 202601010003
+Aerodrome warning for station VABB for January 2026
 Sl. No.,Elements (Thunderstorm/Surface wind & Gust),Warning issue Time,true-1 / false-0,Remarks,Station,Validity From,Validity To,Accuracy_Percentage,Warning_Type
 1,Gust warning,30/0750,1,OBS,VABB,300730Z,301200Z,100%,Wind
 2,Gust warning,31/0530,0,No gust/direction mismatch,VABB,310600Z,311000Z,0%,Wind
