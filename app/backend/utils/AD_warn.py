@@ -97,7 +97,6 @@ def parse_warning_file(filepath, station_code=None):
         timestr = timestr.rstrip('Z')
         if len(timestr) < 4: return timestr + z
         
-        # Handle case where prefix contains day information (e.g., "13" from "132345")
         if len(timestr) >= 6:  # Format like "132345" or "132345Z"
             day = int(timestr[:2])
             hour, minute = int(timestr[2:4]), int(timestr[4:6])

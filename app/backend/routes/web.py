@@ -1,10 +1,13 @@
 from flask import Blueprint, render_template, request, jsonify, send_file,make_response,redirect
 from app.backend.utils.ogimet_adwarn import OgimetAPIAdWarn
 from datetime import datetime
-import os
 import shutil
 from app.backend.config import METAR_DATA_DIR, AD_WARN_DIR, DOCKER_VOLUME_MOUNT_POINT
 from app.backend.auth import get_current_user, require_role
+import pandas as pd
+import plotly.graph_objects as go
+import re
+import os
 
 # web = Blueprint('web', __name__,url_prefix='/web')
 web = Blueprint('web', __name__)
@@ -214,11 +217,7 @@ def bar_chart():
     Generate the combined accuracy chart directly here (no external script).
     """
     try:
-        import pandas as pd
-        import plotly.graph_objects as go
-        import re
-        import os
-
+    
         # Paths
         ad_warn_dir = os.path.join(DOCKER_VOLUME_MOUNT_POINT, 'ad_warn_data')
         report_csv = os.path.join(ad_warn_dir, 'final_warning_report.csv')

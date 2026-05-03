@@ -8,7 +8,6 @@
 // }
 
 function showCustomAlert(message) {
-    console.log('showCustomAlert called with:', message);
     try {
         let alertContainer = document.getElementById('customAlertContainer');
         if (!alertContainer) {
@@ -47,7 +46,6 @@ function showCustomAlert(message) {
             }
         }, 8000);
         
-        console.log('Custom alert created successfully');
     } catch (error) {
         console.error('Error creating custom alert:', error);
         // Fallback to browser alert
@@ -426,7 +424,6 @@ if (downloadGraphBtn) {
     fileInputs.forEach(input => {
         input.addEventListener('change', function (e) {
             const file = e.target.files[0];
-            console.log('File selected:', file);
             if (!file) return;
 
             const uploadBox = this.closest('.upload-box');
@@ -739,7 +736,6 @@ if (downloadGraphBtn) {
                 })
                 .then(data => {
                     hideLoadingSection(); // Hide loading on success
-                    console.log('METAR data processed successfully:', data);
 
                     // Get the encoded paths for the CSV files
                     const comparisonEncodedPath = data.file_paths.comparison_csv;
@@ -1296,7 +1292,6 @@ upperAirVerifyBtn.addEventListener('click', function () {
     tableBody.innerHTML = ''; // Clear previous data
 
     data.data.forEach((row, index) => {
-        console.log('Processing row:', row);
         const rowKey = `${row.date}_${row.validity}`;
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1492,16 +1487,13 @@ if (adwrnForm && adwrnMessage && adwrnMetarPreview && adwrnFetchBtn) {
         }
         
         // Validation: Check required fields
-        console.log('Validating aerodrome fetch fields...');
         const stationCode = document.getElementById('adwrn-station-input').value.trim();
         const startDate = adwrnForm.querySelector('input[name="start_date"]').value.trim();
         const endDate = adwrnForm.querySelector('input[name="end_date"]').value.trim();
         const errorDiv = document.getElementById('adwrn-fetch-error');
         const errorMessage = document.getElementById('adwrn-error-message');
         
-        console.log('Station code:', stationCode);
-        console.log('Start date:', startDate);
-        console.log('End date:', endDate);
+       
         
         let validationErrors = [];
         
@@ -1516,15 +1508,12 @@ if (adwrnForm && adwrnMessage && adwrnMetarPreview && adwrnFetchBtn) {
         }
         
         if (validationErrors.length > 0) {
-            console.log('Validation errors found:', validationErrors);
             const errorText = `Please fill in the following required fields: ${validationErrors.join(', ')}.`;
             if (errorMessage) errorMessage.textContent = errorText;
             if (errorDiv) errorDiv.classList.remove('hidden');
-            console.log('Error message shown');
             return; // Stop execution here
         }
         
-        console.log('Validation passed');
         // Hide error message if validation passes
         if (errorDiv) errorDiv.classList.add('hidden');
         
@@ -1559,7 +1548,6 @@ if (adwrnForm && adwrnMessage && adwrnMetarPreview && adwrnFetchBtn) {
             adwrnFetchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             
             adwrnMessage.innerHTML = `<span class='text-green-700'>${data.message}</span>`;
-            console.log(data.metar_preview);
             if (data.metar_preview) {
                 adwrnMetarPreview.textContent = data.metar_preview;
 
@@ -1639,7 +1627,6 @@ const adwrnReportLoadingSection = document.getElementById('adwrn-reportLoadingSe
 
 // Function to download Excel report with station name, validity period, and accuracy
 function downloadExcel() {
-    console.log('Download button clicked');
     
     const stationInput = document.getElementById('adwrn-station-input');
     const startDateInput = document.querySelector('input[name="start_date"]');
@@ -1677,7 +1664,6 @@ function downloadExcel() {
     
     // Create filename
     const filename = `${stationName}_Aerodrome_Warning_${validityPeriod}_${accuracyPercent}%_accuracy.csv`;
-    console.log('Attempting to download:', filename);
     
     // Show loading state
     const downloadBtn = document.querySelector('#adwrn-download-container button, #adwrn-download-report-btn');
@@ -1696,7 +1682,6 @@ function downloadExcel() {
     // Fetch the CSV data and trigger download
     fetch('/api/download/adwrn_report')
         .then(response => {
-            console.log('Download response status:', response.status);
             if (!response.ok) {
                 return response.json().then(errData => {
                     throw new Error(errData.error || 'Failed to download report');
@@ -1705,7 +1690,6 @@ function downloadExcel() {
             return response.blob();
         })
         .then(blob => {
-            console.log('Download blob received, size:', blob.size);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1715,7 +1699,6 @@ function downloadExcel() {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            console.log('Download completed successfully');
         })
         .catch(error => {
             console.error('Download error:', error);
@@ -1725,7 +1708,6 @@ function downloadExcel() {
 
 if (adwrnVerifyBtn && adwrnReportLoadingSection) {
     adwrnVerifyBtn.addEventListener('click', function() {
-        console.log('Verify button clicked'); // Debug log
         
         // Log AD warning verification activity
         logVerificationActivity('AD Warning Verification', 'Verification initiated');
@@ -1737,11 +1719,9 @@ if (adwrnVerifyBtn && adwrnReportLoadingSection) {
         adwrnReportLoadingSection.style.display = 'flex';
         fetch('/api/adwrn_verify', { method: 'POST' })
             .then(response => {
-                console.log('Response status:', response.status); // Debug log
                 return response.json();
             })
             .then(data => {
-                console.log('Response data:', data); // Debug log
                 adwrnReportLoadingSection.style.display = 'none';
                 if (data.success) {
                     // Extract accuracy percentages from the data
@@ -1864,7 +1844,6 @@ if (adwrnVerifyBtn && adwrnReportLoadingSection) {
                     }
                     
                 } else {
-                    console.log('Validation failed:', data); // Debug log
                     // Handle validation errors with more specific messaging
                     if (data.validation_failed) {
                         let errorMessage = data.error;
@@ -1879,16 +1858,13 @@ if (adwrnVerifyBtn && adwrnReportLoadingSection) {
                             errorMessage = `${data.error}\n\nPlease check that the METAR data covers the warning period and that the warning file contains a valid issue date.`;
                         }
                         
-                        console.log('Showing validation error:', errorMessage); // Debug log
                         showCustomAlert(errorMessage);
                     } else {
-                        console.log('Showing general error:', data.error); // Debug log
                         showCustomAlert(data.error || 'Verification failed.');
                     }
                 }
             })
             .catch(err => {
-                console.log('Fetch error:', err); // Debug log
                 adwrnReportLoadingSection.style.display = 'none';
                 showCustomAlert('Error: ' + err.message);
             });
@@ -1923,7 +1899,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to download aerodrome warnings table
 function downloadAerodromeWarningsTable() {
-    console.log('Aerodrome warnings table download button clicked');
     
     const stationInput = document.getElementById('adwrn-station-input');
     const startDateInput = document.querySelector('input[name="start_date"]');
@@ -1951,7 +1926,6 @@ function downloadAerodromeWarningsTable() {
     
     // Create filename
     const filename = `${stationName}_Aerodrome_Warnings_Table_${validityPeriod}.xlsx`;
-    console.log('Attempting to download aerodrome warnings table:', filename);
     
     // Show loading state
     const tableDownloadBtn = document.getElementById('adwrn-downloadTableBtn');
@@ -1970,7 +1944,6 @@ function downloadAerodromeWarningsTable() {
     // Fetch the table data and trigger download
     fetch('/api/download/adwrn_table')
         .then(response => {
-            console.log('Table download response status:', response.status);
             if (!response.ok) {
                 return response.json().then(errData => {
                     throw new Error(errData.error || 'Failed to download aerodrome warnings table');
@@ -1979,7 +1952,6 @@ function downloadAerodromeWarningsTable() {
             return response.blob();
         })
         .then(blob => {
-            console.log('Table download blob received, size:', blob.size);
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1989,7 +1961,6 @@ function downloadAerodromeWarningsTable() {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-            console.log('Aerodrome warnings table download completed successfully');
         })
         .catch(error => {
             console.error('Table download error:', error);
