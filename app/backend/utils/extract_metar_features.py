@@ -59,9 +59,10 @@ def extract_metar_features(ad_warn_output_path, metar_file_path, output_path):
                         wind_match = re.search(r' (\d{3})(\d{2})(G(\d{2,3}))?KT', metar)
                         wind_dir = int(wind_match.group(1)) if wind_match else None
                         wind_gust = int(wind_match.group(4)) if wind_match and wind_match.group(4) else None
+                        wind_speed = None if wind_gust else (int(wind_match.group(2)) if wind_match else None)
                         clouds = re.findall(r'(FEW\d{3}(?:CB|TCU)?|SCT\d{3}(?:CB|TCU)?|BKN\d{3}(?:CB|TCU)?|OVC\d{3}(?:CB|TCU)?)', metar)
                         out.write(f'  METAR: {metar}\n')
-                        out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Clouds: {clouds}\n')
+                        out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Wind Speed: {wind_speed}, Clouds: {clouds}\n')
                     # If we reach the end, continue from the start
                     if extracting and i == len(metar_lines) - 1:
                         for j, metar2 in enumerate(metar_lines):
@@ -72,9 +73,10 @@ def extract_metar_features(ad_warn_output_path, metar_file_path, output_path):
                                 wind_match = re.search(r' (\d{3})(\d{2})(G(\d{2,3}))?KT', metar2)
                                 wind_dir = int(wind_match.group(1)) if wind_match else None
                                 wind_gust = int(wind_match.group(4)) if wind_match and wind_match.group(4) else None
+                                wind_speed = None if wind_gust else (int(wind_match.group(2)) if wind_match else None)
                                 clouds = re.findall(r'(FEW\d{3}(?:CB|TCU)?|SCT\d{3}(?:CB|TCU)?|BKN\d{3}(?:CB|TCU)?|OVC\d{3}(?:CB|TCU)?)', metar2)
                                 out.write(f'  METAR: {metar2}\n')
-                                out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Clouds: {clouds}\n')
+                                out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Wind Speed: {wind_speed}, Clouds: {clouds}\n')
                             if int(metar_time2) == int(validity_to):
                                 break
                         break
@@ -86,9 +88,10 @@ def extract_metar_features(ad_warn_output_path, metar_file_path, output_path):
                         wind_match = re.search(r' (\d{3})(\d{2})(G(\d{2,3}))?KT', metar)
                         wind_dir = int(wind_match.group(1)) if wind_match else None
                         wind_gust = int(wind_match.group(4)) if wind_match and wind_match.group(4) else None
+                        wind_speed = None if wind_gust else (int(wind_match.group(2)) if wind_match else None)
                         clouds = re.findall(r'(FEW\d{3}(?:CB|TCU)?|SCT\d{3}(?:CB|TCU)?|BKN\d{3}(?:CB|TCU)?|OVC\d{3}(?:CB|TCU)?)', metar)
                         out.write(f'  METAR: {metar}\n')
-                        out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Clouds: {clouds}\n')
+                        out.write(f'    Wind Dir: {wind_dir}, Gust: {wind_gust}, Wind Speed: {wind_speed}, Clouds: {clouds}\n')
                     if extracting and int(metar_time) > int(validity_to):
                         break
     
