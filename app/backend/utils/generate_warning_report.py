@@ -59,11 +59,13 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
         found_gust = False
         found_dir = False
         found_cb = False
+        found_wind_speed = False
         gust_reported = ''
         dir_reported = ''
         cb_reported = ''
         tsra_reported = ''
         cb_cloud_group = ''
+        wind_speed_reported = ''
 
         for line in metar_lines:
             # Gust
@@ -83,6 +85,24 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
                             dir_reported = f'{metar_dir}'
                     except Exception:
                         pass
+            # Wind Speed (only present when gust is absent)
+            wind_speed_match = re.search(r'Wind Speed: (\d+)', line)
+            if wind_speed_match:
+                metar_wind_speed = int(wind_speed_match.group(1))
+                if metar_wind_speed >= 14:
+                    # Check direction condition for wind speed
+                    dir_match_ws = re.search(r'Wind Dir: (\d+)', line)
+                    if dir_match_ws and wind_dir_fcst:
+                        metar_dir_ws = int(dir_match_ws.group(1))
+                        try:
+                            fcst_dir = int(wind_dir_fcst)
+                            if abs(metar_dir_ws - fcst_dir) <= 30:
+                                found_wind_speed = True
+                                found_dir = True
+                                wind_speed_reported = f'{metar_wind_speed}KT'
+                                dir_reported = f'{metar_dir_ws}'
+                        except Exception:
+                            pass
             # CB cloud detection from Clouds list
             clouds_match = re.search(r"Clouds: \[(.*?)\]", line)
             if clouds_match:
@@ -103,9 +123,12 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
             # 1. Gust warning entry
             gust_true_false = 0
             gust_remark = ''
-            if found_gust and found_dir:
+            if (found_gust and found_dir) or (found_wind_speed and found_dir):
                 gust_true_false = 1
-                gust_remark = f'Gust {gust_reported} Dir {dir_reported} matched'
+                if found_gust:
+                    gust_remark = f'Gust {gust_reported} Dir {dir_reported} matched'
+                else:
+                    gust_remark = f'Wind Speed {wind_speed_reported} Dir {dir_reported} matched'
                 if cb_cloud_group:
                     gust_remark += f' {cb_cloud_group} found'
             else:
@@ -128,9 +151,12 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
             
         elif has_gust and not has_tsra:
             # Pure gust warning
-            if found_gust and found_dir:
+            if (found_gust and found_dir) or (found_wind_speed and found_dir):
                 true_false = 1
-                remark = f'Gust {gust_reported} Dir {dir_reported} matched'
+                if found_gust:
+                    remark = f'Gust {gust_reported} Dir {dir_reported} matched'
+                else:
+                    remark = f'Wind Speed {wind_speed_reported} Dir {dir_reported} matched'
                 if cb_cloud_group:
                     remark += f' {cb_cloud_group} found'
             else:
