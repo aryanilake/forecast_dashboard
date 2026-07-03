@@ -42,3 +42,32 @@ class UserActivity(db.Model):
             "tab_id": self.tab_id,
             "details": self.details
         }
+
+
+class VerificationParameter(db.Model):
+    __tablename__ = "verification_parameters"
+
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(50), nullable=False)
+    param_key = db.Column(db.String(50), nullable=False)
+    param_value = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(20), nullable=True)
+    description = db.Column(db.String(200), nullable=True)
+    is_enabled = db.Column(db.Boolean, default=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("category", "param_key", name="uq_verification_parameters_category_key"),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "category": self.category,
+            "param_key": self.param_key,
+            "param_value": self.param_value,
+            "unit": self.unit,
+            "description": self.description,
+            "is_enabled": self.is_enabled,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

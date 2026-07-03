@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 from urllib.parse import quote
 import math
-from app.backend.auth import require_role, log_activity
+from app.backend.auth import require_role, log_activity, get_verification_params
 from app.backend.models import UserActivity, User
 import io
 import plotly.express as px
@@ -335,8 +335,10 @@ def process_metar():
         # Extract forecast data
         df_forecast = extract_data_from_file_with_day_and_wind(forecast_path)
         
+        takeoff_params = get_verification_params("takeoff") or {}
+
         # Compare weather data
-        comparison_df, merged_df = compare_weather_data(df_metar, df_forecast)
+        comparison_df, merged_df = compare_weather_data(df_metar, df_forecast, **takeoff_params)
         
         # Store last comparison results globally (so /accuracy_chart can access it)
         global last_comparison_df
@@ -658,13 +660,18 @@ def process_upper_air():
                 ) if pd.notnull(row["actual_wind_direction"]) and pd.notnull(row["Wind Direction"]) else np.nan,
                 axis=1
             )
-            min_pairs["wind_dir_correct"] = min_pairs["wind_dir_diff"] <= 30
+            local_area_params = get_verification_params("local_area") or {}
+            temp_threshold = float(local_area_params.get("temp_threshold", 2))
+            wind_speed_threshold = float(local_area_params.get("wind_speed_threshold", 10))
+            wind_dir_threshold = float(local_area_params.get("wind_dir_threshold", 30))
+
+            min_pairs["wind_dir_correct"] = min_pairs["wind_dir_diff"] <= wind_dir_threshold
             wind_dir_accuracy = round(min_pairs["wind_dir_correct"].mean() * 100, 2)
         else:
             wind_dir_accuracy = None
 
-        min_pairs["temp_correct"] = min_pairs["temp_diff"] <= 2
-        min_pairs["wind_correct"] = min_pairs["wind_diff"] <= 10
+            min_pairs["temp_correct"] = min_pairs["temp_diff"] <= temp_threshold
+            min_pairs["wind_correct"] = min_pairs["wind_diff"] <= wind_speed_threshold
 
         temp_accuracy = round(min_pairs["temp_correct"].mean() * 100, 2)
         wind_accuracy = round(min_pairs["wind_correct"].mean() * 100, 2)
@@ -929,7 +936,13 @@ def adwrn_verify():
             raise
         
     
-        final_df, accuracy = generate_warning_report(ad_warn_output, metar_features)
+        aerodrome_params = get_verification_params("aerodrome") or {}
+        final_df, accuracy = generate_warning_report(
+            ad_warn_output,
+            metar_features,
+            wind_dir_tolerance=float(aerodrome_params.get("wind_dir_tolerance", 30)),
+            wind_speed_gust_threshold=float(aerodrome_params.get("wind_speed_gust_threshold", 14)),
+        )
         
         # Debug accuracy value
         print(f"[DEBUG] Accuracy type: {type(accuracy)}, value: {accuracy}")

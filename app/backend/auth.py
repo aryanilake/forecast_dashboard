@@ -2,13 +2,74 @@ import jwt, datetime, os
 from functools import wraps
 from flask import Blueprint, request, jsonify, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import db, User, UserActivity
+from .models import db, User, UserActivity, VerificationParameter
 from .config import Config
 import os
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 ROLE_ORDER = {"user": 1, "admin": 2, "super_admin": 3}
+
+VERIFICATION_PARAMETER_DEFAULTS = {
+    "takeoff": [
+        {"param_key": "wind_dir_threshold", "param_value": 30, "unit": "°", "description": "Wind direction tolerance"},
+        {"param_key": "wind_speed_threshold", "param_value": 5, "unit": "knots", "description": "Wind speed tolerance"},
+        {"param_key": "temp_threshold", "param_value": 1, "unit": "°C", "description": "Temperature tolerance"},
+        {"param_key": "qnh_threshold", "param_value": 1, "unit": "hPa", "description": "QNH tolerance"},
+    ],
+    "local_area": [
+        {"param_key": "temp_threshold", "param_value": 2, "unit": "°C", "description": "Temperature tolerance"},
+        {"param_key": "wind_speed_threshold", "param_value": 10, "unit": "knots", "description": "Wind speed tolerance"},
+        {"param_key": "wind_dir_threshold", "param_value": 30, "unit": "°", "description": "Wind direction tolerance"},
+    ],
+    "aerodrome": [
+        {"param_key": "wind_dir_tolerance", "param_value": 30, "unit": "°", "description": "Direction tolerance used for gust and wind speed checks"},
+        {"param_key": "wind_speed_gust_threshold", "param_value": 14, "unit": "knots", "description": "Minimum wind speed for gust warning"},
+    ],
+}
+
+
+def _serialize_verification_parameter(parameter):
+    return parameter.to_dict()
+
+
+def seed_verification_parameters():
+    created = False
+    for category, parameters in VERIFICATION_PARAMETER_DEFAULTS.items():
+        for parameter in parameters:
+            existing = VerificationParameter.query.filter_by(
+                category=category,
+                param_key=parameter["param_key"],
+            ).first()
+            if existing:
+                continue
+            db.session.add(VerificationParameter(
+                category=category,
+                param_key=parameter["param_key"],
+                param_value=parameter["param_value"],
+                unit=parameter.get("unit"),
+                description=parameter.get("description"),
+                is_enabled=True,
+            ))
+            created = True
+
+    if created:
+        db.session.commit()
+
+
+def get_verification_params(category):
+    parameters = VerificationParameter.query.filter_by(category=category, is_enabled=True).all()
+    return {parameter.param_key: parameter.param_value for parameter in parameters}
+
+
+def _get_grouped_verification_params():
+    grouped = {}
+    for category in VERIFICATION_PARAMETER_DEFAULTS.keys():
+        grouped[category] = [
+            _serialize_verification_parameter(parameter)
+            for parameter in VerificationParameter.query.filter_by(category=category).order_by(VerificationParameter.id.asc()).all()
+        ]
+    return grouped
 
 
 @auth_bp.route("/me", methods=["GET"])
@@ -395,6 +456,73 @@ def create_super_admin():
 
     db.session.add(super_admin)
     db.session.commit()
+
+
+@auth_bp.route("/verification-params", methods=["GET"])
+@require_role("super_admin")
+def list_verification_params(current_user):
+    return jsonify(_get_grouped_verification_params()), 200
+
+
+@auth_bp.route("/verification-params", methods=["PUT"])
+@require_role("super_admin")
+def update_verification_params(current_user):
+    data = request.get_json(silent=True) or {}
+    category = str(data.get("category", "")).strip()
+    parameters = data.get("parameters", [])
+
+    if category not in VERIFICATION_PARAMETER_DEFAULTS:
+        return jsonify({"error": "Invalid verification category"}), 400
+
+    if not isinstance(parameters, list) or not parameters:
+        return jsonify({"error": "parameters must be a non-empty list"}), 400
+
+    allowed_keys = {item["param_key"] for item in VERIFICATION_PARAMETER_DEFAULTS[category]}
+    defaults_by_key = {item["param_key"]: item for item in VERIFICATION_PARAMETER_DEFAULTS[category]}
+    updated_rows = []
+
+    for parameter in parameters:
+        param_key = str(parameter.get("param_key", "")).strip()
+        if param_key not in allowed_keys:
+            return jsonify({"error": f"Invalid parameter key: {param_key}"}), 400
+
+        raw_value = parameter.get("param_value")
+        try:
+            numeric_value = float(raw_value)
+        except (TypeError, ValueError):
+            return jsonify({"error": f"Value for {param_key} must be numeric"}), 400
+
+        if numeric_value < 0:
+            return jsonify({"error": f"Value for {param_key} must be greater than or equal to 0"}), 400
+
+        is_enabled = bool(parameter.get("is_enabled", True))
+        row = VerificationParameter.query.filter_by(category=category, param_key=param_key).first()
+        if not row:
+            default_item = defaults_by_key[param_key]
+            row = VerificationParameter(
+                category=category,
+                param_key=param_key,
+                param_value=numeric_value,
+                unit=default_item.get("unit"),
+                description=default_item.get("description"),
+                is_enabled=is_enabled,
+            )
+            db.session.add(row)
+        else:
+            row.param_value = numeric_value
+            row.is_enabled = is_enabled
+            if row.unit is None:
+                row.unit = defaults_by_key[param_key].get("unit")
+            if row.description is None:
+                row.description = defaults_by_key[param_key].get("description")
+        updated_rows.append(row)
+
+    db.session.commit()
+    return jsonify({
+        "message": "Verification parameters updated successfully",
+        "category": category,
+        "parameters": [_serialize_verification_parameter(row) for row in updated_rows],
+    }), 200
 
 @auth_bp.route("/create-admin", methods=["POST"])
 @require_role("super_admin")

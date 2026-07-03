@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MWO Mumbai -Super Admin Dashboard</title>
   <script src="/js/tailwind.js"></script>
@@ -285,39 +286,103 @@
 </header>
 
 <main class="p-4 sm:p-6 max-w-7xl mx-auto w-full space-y-6 flex-1">
-  <!-- Admins Section -->
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">Admins</h2>
-      <div class="flex flex-wrap gap-3">
-        <!-- <a href="/admin_logs.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2">
-          <i class="fas fa-clipboard-list"></i>View Logs
-        </a> -->
-        <button id="addAdminBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2">
-          <i class="fas fa-plus"></i>Add Admin
-        </button>
+  <div class="bg-white rounded-lg shadow-md p-2 sm:p-3 flex flex-wrap gap-2">
+    <button type="button" data-tab-target="userManagementTab" class="verification-tab-btn bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold">User Management</button>
+    <button type="button" data-tab-target="verificationParametersTab" class="verification-tab-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-semibold">Verification Parameters</button>
+  </div>
+
+  <div id="userManagementTab" data-tab-panel class="space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">Admins</h2>
+        <div class="flex flex-wrap gap-3">
+          <!-- <a href="/admin_logs.html" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-clipboard-list"></i>View Logs
+          </a> -->
+          <button id="addAdminBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2">
+            <i class="fas fa-plus"></i>Add Admin
+          </button>
+        </div>
+      </div>
+      <div id="adminList" class="space-y-3">
+        <div class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mr-2"></div>
+          <p class="text-gray-500">Loading admins...</p>
+        </div>
       </div>
     </div>
-    <div id="adminList" class="space-y-3">
-      <div class="flex items-center justify-center py-8">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mr-2"></div>
-        <p class="text-gray-500">Loading admins...</p>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">Users</h2>
+        <button id="addUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 w-full sm:w-auto">
+          <i class="fas fa-plus"></i>Add User
+        </button>
+      </div>
+      <div id="userList" class="space-y-3">
+        <div class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+          <p class="text-gray-500">Loading users...</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Users Section -->
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">Users</h2>
-      <button id="addUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 w-full sm:w-auto">
-        <i class="fas fa-plus"></i>Add User
-      </button>
-    </div>
-    <div id="userList" class="space-y-3">
-      <div class="flex items-center justify-center py-8">
-        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
-        <p class="text-gray-500">Loading users...</p>
+  <div id="verificationParametersTab" data-tab-panel class="hidden space-y-6">
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div class="flex flex-col gap-2 mb-4">
+        <h2 class="text-xl font-semibold text-gray-800">Verification Parameters</h2>
+        <p class="text-sm text-gray-500">Adjust the thresholds used during forecast verification. Changes are saved in the database and applied dynamically.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="border border-gray-200 rounded-lg bg-gray-50">
+          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyTakeoff" data-section-name="Take-Off Forecast">
+            <div>
+              <h3 class="text-base font-semibold text-gray-800">Take-Off Forecast</h3>
+              <p class="text-sm text-gray-500">Wind, temperature and QNH checks for take-off verification.</p>
+            </div>
+            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyTakeoff"></i>
+          </button>
+          <div id="verificationSectionBodyTakeoff" class="px-4 pb-4 space-y-4">
+            <div id="verificationParams-takeoff" class="space-y-3"></div>
+            <div class="flex justify-end pt-2">
+              <button type="button" onclick="saveVerificationParams('takeoff')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Take-Off Parameters</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-gray-50">
+          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyLocalArea" data-section-name="Local Area Forecast">
+            <div>
+              <h3 class="text-base font-semibold text-gray-800">Local Area Forecast</h3>
+              <p class="text-sm text-gray-500">Upper-air comparison thresholds for temperature, wind speed and direction.</p>
+            </div>
+            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyLocalArea"></i>
+          </button>
+          <div id="verificationSectionBodyLocalArea" class="px-4 pb-4 space-y-4">
+            <div id="verificationParams-local_area" class="space-y-3"></div>
+            <div class="flex justify-end pt-2">
+              <button type="button" onclick="saveVerificationParams('local_area')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Local Area Parameters</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-lg bg-gray-50">
+          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyAerodrome" data-section-name="Aerodrome Warning">
+            <div>
+              <h3 class="text-base font-semibold text-gray-800">Aerodrome Warning</h3>
+              <p class="text-sm text-gray-500">Surface wind and gust verification uses one shared direction tolerance.</p>
+            </div>
+            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyAerodrome"></i>
+          </button>
+          <div id="verificationSectionBodyAerodrome" class="px-4 pb-4 space-y-4">
+            <div id="verificationParams-aerodrome" class="space-y-3"></div>
+            <div class="flex justify-end pt-2">
+              <button type="button" onclick="saveVerificationParams('aerodrome')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Aerodrome Parameters</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

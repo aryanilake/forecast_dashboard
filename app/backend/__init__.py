@@ -5,7 +5,7 @@ import os
 from flask_cors import CORS
 from .config import Config, initialize_data_directories
 from .models import db
-from .auth import create_super_admin
+from .auth import create_super_admin, seed_verification_parameters
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -55,6 +55,7 @@ def create_app():
                 initialize_data_directories()
                 db.create_all()
                 create_super_admin()
+                seed_verification_parameters()
                 print("[INIT] ✓ Initialization complete")
                 _initialized = True
         except Exception as e:
