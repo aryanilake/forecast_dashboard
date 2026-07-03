@@ -6,7 +6,12 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import get_column_letter
 
-def generate_warning_report(ad_warn_output_path, metar_features_path):
+def generate_warning_report(
+    ad_warn_output_path,
+    metar_features_path,
+    wind_dir_tolerance=30,
+    wind_speed_gust_threshold=14,
+):
     # Read warnings
     ad_warn_df = pd.read_csv(ad_warn_output_path, dtype={'Issue date/time': str})
 
@@ -78,7 +83,7 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
                     metar_dir = int(dir_match.group(1))
                     try:
                         fcst_dir = int(wind_dir_fcst)
-                        if abs(metar_dir - fcst_dir) <= 30:
+                        if abs(metar_dir - fcst_dir) <= wind_dir_tolerance:
                             found_gust = True
                             found_dir = True
                             gust_reported = f'{metar_gust}KT'
@@ -89,14 +94,14 @@ def generate_warning_report(ad_warn_output_path, metar_features_path):
             wind_speed_match = re.search(r'Wind Speed: (\d+)', line)
             if wind_speed_match:
                 metar_wind_speed = int(wind_speed_match.group(1))
-                if metar_wind_speed >= 14:
+                if metar_wind_speed >= wind_speed_gust_threshold:
                     # Check direction condition for wind speed
                     dir_match_ws = re.search(r'Wind Dir: (\d+)', line)
                     if dir_match_ws and wind_dir_fcst:
                         metar_dir_ws = int(dir_match_ws.group(1))
                         try:
                             fcst_dir = int(wind_dir_fcst)
-                            if abs(metar_dir_ws - fcst_dir) <= 30:
+                            if abs(metar_dir_ws - fcst_dir) <= wind_dir_tolerance:
                                 found_wind_speed = True
                                 found_dir = True
                                 wind_speed_reported = f'{metar_wind_speed}KT'

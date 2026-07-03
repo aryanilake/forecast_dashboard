@@ -1,3 +1,164 @@
+const VERIFICATION_CATEGORY_LABELS = {
+    takeoff: 'Take-Off Forecast',
+    local_area: 'Local Area Forecast',
+    aerodrome: 'Aerodrome Warning'
+};
+
+let verificationParamsLoaded = false;
+
+function setActiveTab(tabName) {
+    const panels = document.querySelectorAll('[data-tab-panel]');
+    panels.forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== tabName);
+    });
+
+    const buttons = document.querySelectorAll('[data-tab-target]');
+    buttons.forEach(button => {
+        const isActive = button.dataset.tabTarget === tabName;
+        button.className = isActive
+            ? 'verification-tab-btn bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold'
+            : 'verification-tab-btn bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-md text-sm font-semibold';
+    });
+
+    if (tabName === 'verificationParametersTab' && !verificationParamsLoaded) {
+        loadVerificationParams();
+    }
+}
+
+function setupSuperAdminTabs() {
+    const buttons = document.querySelectorAll('[data-tab-target]');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => setActiveTab(button.dataset.tabTarget));
+    });
+
+    const sectionButtons = document.querySelectorAll('.verification-section-toggle');
+    sectionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.sectionTarget;
+            const body = document.getElementById(targetId);
+            const icon = document.querySelector(`[data-section-icon="${targetId}"]`);
+            if (!body) return;
+            body.classList.toggle('hidden');
+            if (icon) {
+                icon.classList.toggle('rotate-180', body.classList.contains('hidden'));
+            }
+        });
+    });
+
+    setActiveTab('userManagementTab');
+}
+
+function toggleVerificationParamRow(checkbox) {
+    const row = checkbox.closest('.verification-param-row');
+    if (!row) return;
+    const input = row.querySelector('.verification-param-input');
+    if (input) {
+        input.disabled = !checkbox.checked;
+    }
+    row.classList.toggle('opacity-60', !checkbox.checked);
+}
+
+function renderVerificationParamRow(category, parameter) {
+    const enabled = parameter.is_enabled !== false;
+    const value = parameter.param_value ?? '';
+    const unit = parameter.unit || '';
+    const description = parameter.description || '';
+    return `
+      <div class="verification-param-row grid grid-cols-1 md:grid-cols-12 gap-3 items-start border border-gray-200 rounded-lg p-4 bg-white" data-param-key="${parameter.param_key}" data-category="${category}">
+        <div class="md:col-span-5">
+          <p class="font-semibold text-gray-800">${parameter.param_key}</p>
+          <p class="text-sm text-gray-500">${description}</p>
+        </div>
+        <div class="md:col-span-3">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Current Value</label>
+          <input type="number" min="0" step="any" value="${value}" class="verification-param-input w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" ${enabled ? '' : 'disabled'}>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
+          <div class="w-full border border-gray-200 bg-gray-50 px-3 py-2 rounded-md text-sm text-gray-700">${unit || '-'}</div>
+        </div>
+        <div class="md:col-span-2 flex items-end h-full">
+          <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 mt-auto">
+            <input type="checkbox" class="verification-param-enabled h-4 w-4 text-blue-600 border-gray-300 rounded" ${enabled ? 'checked' : ''} onchange="toggleVerificationParamRow(this)">
+            Enabled
+          </label>
+        </div>
+      </div>
+    `;
+}
+
+async function loadVerificationParams() {
+    try {
+        const res = await fetch('/auth/verification-params', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to load verification parameters');
+
+        const grouped = await res.json();
+        Object.entries(VERIFICATION_CATEGORY_LABELS).forEach(([category]) => {
+            const container = document.getElementById(`verificationParams-${category}`);
+            if (!container) return;
+            const params = grouped?.[category] || [];
+            if (!params.length) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No parameters found.</p>';
+                return;
+            }
+            container.innerHTML = params.map(parameter => renderVerificationParamRow(category, parameter)).join('');
+            container.querySelectorAll('.verification-param-enabled').forEach(checkbox => toggleVerificationParamRow(checkbox));
+        });
+        verificationParamsLoaded = true;
+    } catch (err) {
+        Object.keys(VERIFICATION_CATEGORY_LABELS).forEach(category => {
+            const container = document.getElementById(`verificationParams-${category}`);
+            if (container) container.innerHTML = `<p class="text-red-600 py-4 text-sm">${err.message}</p>`;
+        });
+    }
+}
+
+async function saveVerificationParams(category) {
+    const container = document.getElementById(`verificationParams-${category}`);
+    if (!container) return;
+
+    const rows = container.querySelectorAll('.verification-param-row');
+    const parameters = [];
+
+    for (const row of rows) {
+        const paramKey = row.dataset.paramKey;
+        const input = row.querySelector('.verification-param-input');
+        const enabledInput = row.querySelector('.verification-param-enabled');
+        const value = parseFloat(input?.value);
+
+        if (Number.isNaN(value) || value < 0) {
+            showAlert(`Enter a valid non-negative value for ${paramKey}`, 'error');
+            return;
+        }
+
+        parameters.push({
+            param_key: paramKey,
+            param_value: value,
+            is_enabled: Boolean(enabledInput?.checked)
+        });
+    }
+
+    try {
+        const res = await fetch('/auth/verification-params', {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category, parameters })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to save verification parameters');
+        }
+
+        verificationParamsLoaded = false;
+        await loadVerificationParams();
+        showAlert(`${VERIFICATION_CATEGORY_LABELS[category]} parameters saved successfully`, 'success');
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
 async function loadAdmins() {
     try {
         const res = await fetch('/auth/admins', { credentials: 'include' });
@@ -186,10 +347,14 @@ if (window.authManager && window.authManager.ready) {
             if (info) { info.textContent = authManager.user.username; info.style.display = 'inline'; }
             if (dropdown) dropdown.textContent = authManager.user.username;
         }
+        setupSuperAdminTabs();
         loadAdmins();
         loadUsers();
+        loadVerificationParams();
     }).catch(() => {});
 } else {
+    setupSuperAdminTabs();
     loadAdmins();
     loadUsers();
+    loadVerificationParams();
 }
