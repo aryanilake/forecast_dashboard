@@ -64,23 +64,26 @@ function renderVerificationParamRow(category, parameter) {
     const unit = parameter.unit || '';
     const description = parameter.description || '';
     return `
-      <div class="verification-param-row grid grid-cols-1 md:grid-cols-12 gap-3 items-start border border-gray-200 rounded-lg p-4 bg-white" data-param-key="${parameter.param_key}" data-category="${category}">
-        <div class="md:col-span-5">
-          <p class="font-semibold text-gray-800">${parameter.param_key}</p>
-          <p class="text-sm text-gray-500">${description}</p>
+      <div class="verification-param-row bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col space-y-3 shadow-sm hover:shadow transition-shadow" data-param-key="${parameter.param_key}" data-category="${category}">
+        <div>
+          <p class="font-bold text-gray-800 text-sm tracking-tight break-all">${parameter.param_key}</p>
+          <p class="text-xs text-gray-500 font-medium leading-normal mt-0.5">${description}</p>
         </div>
-        <div class="md:col-span-3">
-          <label class="block text-xs font-medium text-gray-500 mb-1">Current Value</label>
-          <input type="number" min="0" step="any" value="${value}" class="verification-param-input w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" ${enabled ? '' : 'disabled'}>
+        
+        <div>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Current Value</label>
+          <input type="number" min="0" step="any" value="${value}" class="verification-param-input w-full border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800 bg-white" ${enabled ? '' : 'disabled'}>
         </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-medium text-gray-500 mb-1">Unit</label>
-          <div class="w-full border border-gray-200 bg-gray-50 px-3 py-2 rounded-md text-sm text-gray-700">${unit || '-'}</div>
+        
+        <div>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Unit</label>
+          <div class="w-full border border-gray-200 bg-gray-100 px-3 py-1.5 rounded-md text-sm text-gray-700 font-semibold">${unit || '-'}</div>
         </div>
-        <div class="md:col-span-2 flex items-end h-full">
-          <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 mt-auto">
-            <input type="checkbox" class="verification-param-enabled h-4 w-4 text-blue-600 border-gray-300 rounded" ${enabled ? 'checked' : ''} onchange="toggleVerificationParamRow(this)">
-            Enabled
+        
+        <div class="pt-1">
+          <label class="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 cursor-pointer select-none">
+            <input type="checkbox" class="verification-param-enabled h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-colors" ${enabled ? 'checked' : ''} onchange="toggleVerificationParamRow(this)">
+            <span class="ml-1.5">Enabled</span>
           </label>
         </div>
       </div>

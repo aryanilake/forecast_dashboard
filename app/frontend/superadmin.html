@@ -221,6 +221,54 @@
         max-width: 72px;
       }
     }
+
+    /* Redesigned Verification Parameters CSS */
+    .verification-grid {
+      display: grid;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (min-width: 1400px) {
+      .verification-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 768px) and (max-width: 1399px) {
+      .verification-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 767px) {
+      .verification-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+      }
+    }
+    
+    .verification-section-card {
+      height: 660px;
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .verification-scroll-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .verification-scroll-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .verification-scroll-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .verification-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
   </style>
 </head>
 
@@ -329,59 +377,54 @@
   </div>
 
   <div id="verificationParametersTab" data-tab-panel class="hidden space-y-6">
-    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <div class="flex flex-col gap-2 mb-4">
-        <h2 class="text-xl font-semibold text-gray-800">Verification Parameters</h2>
-        <p class="text-sm text-gray-500">Adjust the thresholds used during forecast verification. Changes are saved in the database and applied dynamically.</p>
+
+    <!-- 3-Column Responsive Grid -->
+    <div class="verification-grid">
+      <!-- Left Column: Take-Off Forecast -->
+      <div class="verification-section-card">
+        <div class="p-5 border-b border-gray-100 flex-shrink-0 bg-white">
+          <h3 class="text-lg font-bold text-gray-800">Take-Off Forecast</h3>
+          <p class="text-xs text-gray-500 mt-1 leading-normal">Wind, temperature and QNH checks for take-off verification.</p>
+        </div>
+        <div id="verificationParams-takeoff" class="flex-1 overflow-y-auto p-5 pb-24 space-y-4 verification-scroll-container bg-white">
+          <!-- Dynamic parameter cards render here -->
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gray-50 border-t border-gray-100 flex justify-end items-center rounded-b-xl">
+          <button type="button" onclick="saveVerificationParams('takeoff')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200">
+            Save Take-Off Parameters
+          </button>
+        </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="border border-gray-200 rounded-lg bg-gray-50">
-          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyTakeoff" data-section-name="Take-Off Forecast">
-            <div>
-              <h3 class="text-base font-semibold text-gray-800">Take-Off Forecast</h3>
-              <p class="text-sm text-gray-500">Wind, temperature and QNH checks for take-off verification.</p>
-            </div>
-            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyTakeoff"></i>
-          </button>
-          <div id="verificationSectionBodyTakeoff" class="px-4 pb-4 space-y-4">
-            <div id="verificationParams-takeoff" class="space-y-3"></div>
-            <div class="flex justify-end pt-2">
-              <button type="button" onclick="saveVerificationParams('takeoff')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Take-Off Parameters</button>
-            </div>
-          </div>
+      <!-- Center Column: Local Area Forecast -->
+      <div class="verification-section-card">
+        <div class="p-5 border-b border-gray-100 flex-shrink-0 bg-white">
+          <h3 class="text-lg font-bold text-gray-800">Local Area Forecast</h3>
+          <p class="text-xs text-gray-500 mt-1 leading-normal">Upper-air comparison thresholds for temperature, wind speed and direction.</p>
         </div>
-
-        <div class="border border-gray-200 rounded-lg bg-gray-50">
-          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyLocalArea" data-section-name="Local Area Forecast">
-            <div>
-              <h3 class="text-base font-semibold text-gray-800">Local Area Forecast</h3>
-              <p class="text-sm text-gray-500">Upper-air comparison thresholds for temperature, wind speed and direction.</p>
-            </div>
-            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyLocalArea"></i>
-          </button>
-          <div id="verificationSectionBodyLocalArea" class="px-4 pb-4 space-y-4">
-            <div id="verificationParams-local_area" class="space-y-3"></div>
-            <div class="flex justify-end pt-2">
-              <button type="button" onclick="saveVerificationParams('local_area')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Local Area Parameters</button>
-            </div>
-          </div>
+        <div id="verificationParams-local_area" class="flex-1 overflow-y-auto p-5 pb-24 space-y-4 verification-scroll-container bg-white">
+          <!-- Dynamic parameter cards render here -->
         </div>
-
-        <div class="border border-gray-200 rounded-lg bg-gray-50">
-          <button type="button" class="verification-section-toggle w-full flex items-center justify-between px-4 py-3 text-left" data-section-target="verificationSectionBodyAerodrome" data-section-name="Aerodrome Warning">
-            <div>
-              <h3 class="text-base font-semibold text-gray-800">Aerodrome Warning</h3>
-              <p class="text-sm text-gray-500">Surface wind and gust verification uses one shared direction tolerance.</p>
-            </div>
-            <i class="fas fa-chevron-up text-gray-500" data-section-icon="verificationSectionBodyAerodrome"></i>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gray-50 border-t border-gray-100 flex justify-end items-center rounded-b-xl">
+          <button type="button" onclick="saveVerificationParams('local_area')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200">
+            Save Local Area Parameters
           </button>
-          <div id="verificationSectionBodyAerodrome" class="px-4 pb-4 space-y-4">
-            <div id="verificationParams-aerodrome" class="space-y-3"></div>
-            <div class="flex justify-end pt-2">
-              <button type="button" onclick="saveVerificationParams('aerodrome')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">Save Aerodrome Parameters</button>
-            </div>
-          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Aerodrome Warning -->
+      <div class="verification-section-card">
+        <div class="p-5 border-b border-gray-100 flex-shrink-0 bg-white">
+          <h3 class="text-lg font-bold text-gray-800">Aerodrome Warning</h3>
+          <p class="text-xs text-gray-500 mt-1 leading-normal">Surface wind and gust verification uses one shared direction tolerance.</p>
+        </div>
+        <div id="verificationParams-aerodrome" class="flex-1 overflow-y-auto p-5 pb-24 space-y-4 verification-scroll-container bg-white">
+          <!-- Dynamic parameter cards render here -->
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gray-50 border-t border-gray-100 flex justify-end items-center rounded-b-xl">
+          <button type="button" onclick="saveVerificationParams('aerodrome')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-200">
+            Save Aerodrome Parameters
+          </button>
         </div>
       </div>
     </div>
