@@ -670,8 +670,12 @@ def process_upper_air():
         else:
             wind_dir_accuracy = None
 
-            min_pairs["temp_correct"] = min_pairs["temp_diff"] <= temp_threshold
-            min_pairs["wind_correct"] = min_pairs["wind_diff"] <= wind_speed_threshold
+            local_area_params = get_verification_params("local_area") or {}
+            temp_threshold = float(local_area_params.get("temp_threshold", 2))
+            wind_speed_threshold = float(local_area_params.get("wind_speed_threshold", 10))
+
+        min_pairs["temp_correct"] = min_pairs["temp_diff"] <= temp_threshold
+        min_pairs["wind_correct"] = min_pairs["wind_diff"] <= wind_speed_threshold
 
         temp_accuracy = round(min_pairs["temp_correct"].mean() * 100, 2)
         wind_accuracy = round(min_pairs["wind_correct"].mean() * 100, 2)
