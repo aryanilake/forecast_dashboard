@@ -9,8 +9,8 @@ import plotly.graph_objects as go
 import re
 import os
 
-# web = Blueprint('web', __name__,url_prefix='/web')
-web = Blueprint('web', __name__)
+web = Blueprint('web', __name__,url_prefix='/web')
+# web = Blueprint('web', __name__)
 
 @web.route('/login')
 def login_page():

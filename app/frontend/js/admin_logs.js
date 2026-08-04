@@ -242,7 +242,7 @@ function renderLogsTable(logs) {
                 <span class="${getActivityBadgeClass(log.activity_type)}">${log.activity_type.toUpperCase()}</span>
             </td>
             <td class="px-6 py-4 text-center text-sm text-gray-600">${log.page_or_route || '—'}</td>
-            <td class="px-6 py-4 text-sm text-center text-gray-600 max-w-xs truncate" title="${log.details || ''}">${log.details || '—'}</td>
+            <td class="px-6 py-4 text-sm text-center text-gray-600 whitespace-normal break-words max-w-md" title="${log.details || ''}">${log.details || '—'}</td>
             <td class="px-6 py-4 text-sm text-center text-gray-600 font-mono text-xs">${log.ip_address || '—'}</td>
         </tr>
     `).join('');

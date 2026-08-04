@@ -1528,7 +1528,7 @@ if (adwrnForm && adwrnMessage && adwrnMetarPreview && adwrnFetchBtn) {
         adwrnFetchBtn.classList.add('opacity-50', 'cursor-not-allowed');
         
         const formData = new FormData(adwrnForm);
-        fetch('/fetch_metar', {//add web route here in nginx
+        fetch('/web/fetch_metar', {//add web route here in nginx
     method: 'POST',
     headers:{
         'Content-Type': 'application/json'
@@ -1783,7 +1783,7 @@ if (adwrnVerifyBtn && adwrnReportLoadingSection) {
                              viewGraphBtn.disabled = true;
                              
                              // Open combined chart in a new tab via Flask route
-                             window.open('/bar_chart', '_blank');
+                             window.open('/web/bar_chart', '_blank');
                              
                              // Reset button state after a short delay
                              setTimeout(() => {

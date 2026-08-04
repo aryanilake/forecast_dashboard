@@ -28,9 +28,40 @@ VERIFICATION_PARAMETER_DEFAULTS = {
     ],
 }
 
+VERIFICATION_CATEGORY_LABELS = {
+    "takeoff": "Take-Off Forecast",
+    "local_area": "Local Area Forecast",
+    "aerodrome": "Aerodrome Warning",
+}
+
 
 def _serialize_verification_parameter(parameter):
     return parameter.to_dict()
+
+
+def _format_verification_parameter_value(value, unit=None):
+    if value is None:
+        return "—"
+
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+    if numeric_value.is_integer():
+        formatted_value = str(int(numeric_value))
+    else:
+        formatted_value = str(numeric_value)
+
+    if unit:
+        return f"{formatted_value}{unit}"
+    return formatted_value
+
+
+def _format_verification_parameter_enabled(is_enabled):
+    if is_enabled is None:
+        return "—"
+    return "enabled" if is_enabled else "disabled"
 
 
 def seed_verification_parameters():
@@ -480,6 +511,7 @@ def update_verification_params(current_user):
     allowed_keys = {item["param_key"] for item in VERIFICATION_PARAMETER_DEFAULTS[category]}
     defaults_by_key = {item["param_key"]: item for item in VERIFICATION_PARAMETER_DEFAULTS[category]}
     updated_rows = []
+    change_summaries = []
 
     for parameter in parameters:
         param_key = str(parameter.get("param_key", "")).strip()
@@ -497,6 +529,8 @@ def update_verification_params(current_user):
 
         is_enabled = bool(parameter.get("is_enabled", True))
         row = VerificationParameter.query.filter_by(category=category, param_key=param_key).first()
+        previous_value = row.param_value if row else None
+        previous_enabled = row.is_enabled if row else None
         if not row:
             default_item = defaults_by_key[param_key]
             row = VerificationParameter(
@@ -517,7 +551,32 @@ def update_verification_params(current_user):
                 row.description = defaults_by_key[param_key].get("description")
         updated_rows.append(row)
 
+        if (
+            previous_value is None
+            or previous_enabled is None
+            or float(previous_value) != float(numeric_value)
+            or bool(previous_enabled) != bool(is_enabled)
+        ):
+            description = defaults_by_key[param_key].get("description") or param_key
+            unit = defaults_by_key[param_key].get("unit")
+            change_summaries.append(
+                f"{param_key} ({description}): value {_format_verification_parameter_value(previous_value, unit)} -> {_format_verification_parameter_value(numeric_value, unit)}, status {_format_verification_parameter_enabled(previous_enabled)} -> {_format_verification_parameter_enabled(is_enabled)}"
+            )
+
     db.session.commit()
+
+    if change_summaries:
+        log_activity(
+            current_user,
+            "verification",
+            page_or_route="/auth/verification-params",
+            details=(
+                f"Verification parameters updated for "
+                f"{VERIFICATION_CATEGORY_LABELS.get(category, category)} | Changes: "
+                + "; ".join(change_summaries)
+            ),
+        )
+
     return jsonify({
         "message": "Verification parameters updated successfully",
         "category": category,
