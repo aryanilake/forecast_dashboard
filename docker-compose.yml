@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: aryanilake/metar-backend:latest
+    image: mahis07/metar-backend:latest
     container_name: metar_backend
     ports:
     - "5000:5000"

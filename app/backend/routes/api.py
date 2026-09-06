@@ -1233,6 +1233,7 @@ def get_all_logs(current_user):
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 100, type=int)
         activity_type = request.args.get("activity_type", None)  # Optional filter
+        username = (request.args.get("username", None) or "").strip()  # Optional filter by username
         user_id = request.args.get("user_id", None)  # Optional filter for super admin
         
         # Build base query and join User so role-based filtering is possible
@@ -1243,13 +1244,16 @@ def get_all_logs(current_user):
             query = query.filter(User.role == "user")
 
         if activity_type:
-            query = query.filter_by(activity_type=activity_type)
+            query = query.filter(UserActivity.activity_type == activity_type)
+
+        if username:
+            query = query.filter(User.username.ilike(f"%{username}%"))
 
         # Super admins can filter by specific user id
         if user_id and current_user.role == "super_admin":
             try:
                 user_id = int(user_id)
-                query = query.filter_by(user_id=user_id)
+                query = query.filter(UserActivity.user_id == user_id)
             except ValueError:
                 pass
 

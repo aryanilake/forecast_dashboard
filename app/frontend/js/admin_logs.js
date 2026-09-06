@@ -192,11 +192,15 @@ async function loadLogs() {
     try {
         const perPage = document.getElementById('perPageSelect').value || 50;
         const activityType = document.getElementById('activityTypeFilter').value;
+        const username = document.getElementById('usernameFilter') ? document.getElementById('usernameFilter').value.trim() : '';
         const userId = document.getElementById('userFilter') ? document.getElementById('userFilter').value : '';
         
         let url = `/api/logs/all?page=${currentPage}&per_page=${perPage}`;
         if (activityType) {
             url += `&activity_type=${activityType}`;
+        }
+        if (username) {
+            url += `&username=${encodeURIComponent(username)}`;
         }
         if (userId && currentUserRole === 'super_admin') {
             url += `&user_id=${userId}`;
@@ -293,6 +297,10 @@ function filterLogs() {
 function clearFilters() {
     document.getElementById('activityTypeFilter').value = '';
     document.getElementById('usernameFilter').value = '';
+    const userFilter = document.getElementById('userFilter');
+    if (userFilter) {
+        userFilter.value = '';
+    }
     currentPage = 1;
     loadLogs();
 }
@@ -324,8 +332,16 @@ async function exportLogs() {
         let url = `/api/logs/all?page=1&per_page=${perPage}`;
         
         const activityType = document.getElementById('activityTypeFilter').value;
+        const username = document.getElementById('usernameFilter') ? document.getElementById('usernameFilter').value.trim() : '';
+        const userId = document.getElementById('userFilter') ? document.getElementById('userFilter').value : '';
         if (activityType) {
             url += `&activity_type=${activityType}`;
+        }
+        if (username) {
+            url += `&username=${encodeURIComponent(username)}`;
+        }
+        if (userId && currentUserRole === 'super_admin') {
+            url += `&user_id=${userId}`;
         }
 
         const res = await fetch(url, {
